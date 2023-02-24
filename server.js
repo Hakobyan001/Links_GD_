@@ -10,16 +10,7 @@ app.use(express.json())
 
 app.use('/api/v1', Api);
 
-const allowedOrigins = ['https://app.linksguradian.io', 'https://www.app.linksguardian.io'];
-app.use(cors({
-  origin: function (origin, callback) {
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-}));
+app.use(cors())
 
     app.listen(PORT, () => {
     console.log(`Server is connected on port ${PORT}`);
