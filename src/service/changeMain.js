@@ -98,7 +98,6 @@ class ChangeMain {
         let a = externalInfo[i];
         let a1 = [...new Set(a)];
         FullInfoExternals = a1.map((el) => JSON.parse(el));
-        console.log(domains[i],"aaa");
         // Creating object for All Information of Main link
         info.push(
           {

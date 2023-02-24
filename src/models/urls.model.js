@@ -11,13 +11,19 @@ let days;
 
 class Data {
 
+  static async addChange(campaign_id) {
+    const changedData = await knex('links').update({change: 'inactive'}).where('campaign_id', '=', campaign_id);
+    const changedurlData = await knex('urls').update({change: 'inactive'}).where('campaign_id', '=', campaign_id);
+    return 1
+
+  }
   static async insertUrls(data) {
     for (let int in data) {
       const insertData = await knex('urls').insert({ external_urls: data[int] });
 
     }
-
   }
+
   static async getUrls() {
 
     const selectNullableData = await knex.from('urls').select('external_urls',).where('robot_tag',null)
@@ -59,18 +65,18 @@ class Data {
     const y = await knex.from('links').select('urls', 'id').orderBy('id').limit(limit).offset(offset)
     return y
   }
+  
 
   static async getIds() {
-    const z = await knex.from('urls').select('id').orderBy('id').where('changeing', null)
+    const z = await knex.from('urls').select('id').orderBy('id').where('change','=','inactive')
     return z
 
   }
   static async changeing() {
-    const changerel = await knex.from('urls').select('rel', 'external_urls', 'id').orderBy('id');
-    const changekeyword = await knex.from('urls').select('keyword', 'id').orderBy('id');
+    const changerel = await knex.from('urls').select('rel', 'external_urls','robot_tag', 'id').orderBy('id').where('changeing',null);
+    const changekeyword = await knex.from('urls').select('keyword','status', 'id').orderBy('id').where('changeing',null);
 
     return [changerel, changekeyword]
-
   }
 
   static async getLimit() {
@@ -80,8 +86,8 @@ class Data {
     } else {
       console.log('թարմացնելու  տվյալներ չկան․․․')
     }
-
   }
+
   static async deleteUrls(ids) {
     const delLinks = await knex.from('links').del().whereIn('id', ids).returning('*');
     const delUrls = await knex.from('urls').del().whereIn('links_id', ids).returning('*');
@@ -100,36 +106,9 @@ class Data {
   static async getCrawled() {
     let countupdate = 0;
     let leftcountupdate = 0;
-
-
     const getDofollow = await knex.from('urls').count('id').where('rel', '=', 'dofollow');
     const getNofollow = await knex.from('urls').count('id').where('rel', '=', 'nofollow');
-    // const selsectTimestamp = await knex.from('urls').select('created_at')
-
-    // for (let index = 0; index < selsectTimestamp.length; index++) {
-    //   date_1 = selsectTimestamp[0].created_at
-    //   date_2 = new Date();
-
-
-    //   days = (date_1, date_2) => {
-    //     let difference = date_1.getTime() - date_2.getTime();
-    //     let TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
-    //     return TotalDays;
-    //   }
-    //   console.log(days, "days");
-
-    //   console.log(days(date_1, date_2));
-    //   if (days(date_1, date_2) < 1) {
-
-    //     countupdate.push(days(date_1, date_2));
-
-    //   } else {
-    //     leftcountupdate.push(days(date_1, date_2))
-    //   }
-    // }
-
     const selectChangeing = await knex.from('urls').select('changeing');
-    // console.log(selectChangeing);
 
     for (let index = 0; index < selectChangeing.length; index++) {
       if (selectChangeing[index].changeing === null) {
@@ -138,47 +117,16 @@ class Data {
         countupdate += 1
       }
     }
-
-
     return { "dofollowCount": Number(getDofollow[0].count), "nofollowCount": Number(getNofollow[0].count), "crawledTodayCount": countupdate, "leftForCrawlingCount": leftcountupdate }
-
-
 
   }
 
   static async getCrawledById(userId) {
     let countupdate = 0;
     let leftcountupdate = 0;
-
-
     const getDofollow = await knex.from('urls').count('id').where('rel', '=', 'dofollow').andWhere('user_id', '=', userId);
     const getNofollow = await knex.from('urls').count('id').where('rel', '=', 'nofollow').andWhere('user_id', '=', userId);
-    // const selsectTimestamp = await knex.from('urls').select('created_at').where('user_id', '=', id);
-
-    // for (let index = 0; index < selsectTimestamp.length; index++) {
-    //   date_1 = selsectTimestamp[0].created_at
-    //   date_2 = new Date();
-
-
-    //   days = (date_1, date_2) => {
-    //     let difference = date_1.getTime() - date_2.getTime();
-    //     let TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
-    //     return TotalDays;
-    //   }
-    //   console.log(days, "days");
-
-    //   console.log(days(date_1, date_2));
-    //   if (days(date_1, date_2) < 1) {
-
-    //     countupdate.push(days(date_1, date_2));
-
-    //   } else {
-    //     leftcountupdate.push(days(date_1, date_2))
-    //   }
-    // }
-
     const selectChangeing = await knex.from('urls').select('changeing').where('user_id', '=', userId);
-    // console.log(selectChangeing);
 
     for (let index = 0; index < selectChangeing.length; index++) {
       if (selectChangeing[index].changeing === null) {
@@ -189,8 +137,6 @@ class Data {
     }
 
     return { "dofollowCount": Number(getDofollow[0].count), "nofollowCount": Number(getNofollow[0].count), "crawledTodayCount": countupdate, "leftForCrawlingCount": leftcountupdate }
-
-
 
   }
 
@@ -211,15 +157,6 @@ class Data {
         .on('urls.campaign_id', '=', 'changes.campaign_id')
     }).whereNotNull('changeing');
 
-
-
-
-// const getMainChanges = 
-    // const links = await knex.from('changes').count('campaign_id').where('user_id', '=', userId).andWhere('campaign_id', '=', campaignId);
-    // const urls = await knex.from('urls').select('changeing').where('user_id', '=', userId).andWhere('campaign_id', '=', campaignId);
-    // const linksChanges = links.filter((el) => el.changeing !== null);
-    // const urlsChanges = urls.filter((el) => el.changeing !== null);
-    
     return { linksChanges: joinsLinks.length, urlsChanges: joinsUrls.length};
   }
 
@@ -229,11 +166,20 @@ class Data {
     return failedData
 
   }
+
   static async getChanges() {
     const changeLinks = await knex.from('links').select('campaign_id','user_id').where('changeing',null);
     
     return changeLinks
   }
+
+  static async getExternalWithCheck(){
+    const externalUrls = await knex.from('urls').select('external_urls','id').orderBy('id').where('changeing',null)//.where('status','=','active').andWhere('updated_at','-',new Date(),'<',24 );
+    return externalUrls
+  }
+
+
+
 
 
 }

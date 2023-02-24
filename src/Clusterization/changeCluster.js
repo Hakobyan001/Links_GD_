@@ -17,8 +17,8 @@ let worker = [];
 const step = 1;
 let changedInfo;
 
-cron.schedule('0 0 0 * * *', () => {
-  console.log('will run every day at 12:00 AM ')
+// cron.schedule('0 0 0 * * *', () => {
+//   console.log('will run every day at 12:00 AM ')
 
 
 async function isPrimary() {
@@ -47,7 +47,7 @@ async function isPrimary() {
               if(elem[r].title !== msg.data[0] || elem[r].robot_tag !== msg.data[1] || elem[r].favicon !== msg.data[2] || elem[r].status !== msg.data[3]){
               changedInfo = await knex
                 .from('links')
-                .whereIn('id', msg.data[4])
+                .where("change", "=","active")
                 .update({
                   changeing: {
                     "oldTitle": `"${elem[r].title}"`, "newTitle": `"${msg.data[0]}"`
@@ -101,7 +101,7 @@ async function isPrimary() {
                 if((elem[r].title !== msg.data[0] || elem[r].robot_tag !== msg.data[1]) && (elem[r].favicon !== msg.data[2] || elem[r].status !== msg.data[3])){
                 changedInfo = await knex
                   .from('links')
-                  .whereIn('id', msg.data[4])
+                  .where("change", "=","active")
                   .update({
                     changeing: {
                       "oldTitle": `"${elem[r].title}"`, "newTitle": `"${msg.data[0]}"`
@@ -135,4 +135,4 @@ async function isPrimary() {
 }
 
 isPrimary();
-});
+// });

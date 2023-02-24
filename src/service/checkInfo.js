@@ -1,16 +1,16 @@
 const Data = require('../models/urls.model');
 // enum type
+const ChangeUrls = require('../service/changeUrls')
 const robot = require('../enum/robot.enum');
 const rel = require('../enum/rel.enum');
 
 class CheckInfo {
 
   static async checkInfo(furl) {
+    // console.log(furl,"fur;");
     let links = [];
     links = furl.map((el) => el.urls)
-    const ids = await Data.getIds();
-    const rank = ids.map((elem) => elem.id)
-
+    const rank = []
 
     const aRegex = /<a[^>]*href=['"]([^'"]*)['"][^>]*>([\s\S]*?)<\/a>/g;
     const titleRegex = /<title[^>]*>([\s\S]*?)<\/title>/;
@@ -39,6 +39,7 @@ class CheckInfo {
     let ExternalsLinks = [];
     let dofollow = []
     let nofollow = []
+    const arrayfromExternals = [];
 
 
     try {
@@ -79,7 +80,6 @@ class CheckInfo {
           uniqueArray.push([...new Set(unique[i].filter(str => str.includes(hrefValues[k])))][0]);
         }
         unique2.push(uniqueArray)
-        console.log(unique2);
         //Pushing Information about external links
         for (let x = 0; x < uniqueSorted.length; x++) {
           externalInfo[i].push(JSON.stringify({
@@ -91,7 +91,6 @@ class CheckInfo {
         let a = externalInfo[i];
         let a1 = [...new Set(a)];
         FullInfoAboutExternals = a1.map((el) => JSON.parse(el));
-        console.log(FullInfoAboutExternals,"extrd");
       } catch (error) {
         console.log(error);
         if (hrefs[i] !== undefined) {
@@ -116,11 +115,23 @@ class CheckInfo {
 
     }
 
-// console.log(rank,'rels');
 // console.log(hrefValues,54);
-  return [rank,rels, arr,hrefValues]
+const alfa = await Data.getExternalWithCheck();
 
+
+for(let j in alfa){
+
+arrayfromExternals.push(alfa[j].external_urls)
+rank.push(alfa[j].id)
+} 
+    let FullData;
+    if(rels.length > 0 && arr.length > 0){
+    FullData = await ChangeUrls.changeUrls(arrayfromExternals)
+    if(FullData.length > 0)
+        return [rank,rels, arr,FullData]
+    }
   }
 }
+
 
 module.exports = CheckInfo;

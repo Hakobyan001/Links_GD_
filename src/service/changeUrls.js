@@ -1,18 +1,12 @@
-// const fetch = require('node-fetch');
-const robotsRegex = /<meta[^>]*?name=["']robots["'][^>]*?>/i;
-// const Insert = require('../Clusterization/cluster');
-// const { inserting} = require('../Clusterization/cluster')
+// enum type
+const robot = require('../enum/robot.enum');
+const rel = require('../enum/rel.enum');
 
-let info = {url:[],robot_tag:[],status:[]};
-
-class UrlService {
-  static async checkUrls(domain) {
-    let alfa = [];
-    let unexts = [];
-    for(let k = 0; k < domain.length; k++) {
-      alfa.push(domain[k].external_urls);
-    }
-    unexts = alfa;
+const fetch = require("node-fetch");
+class ChangeUrls {
+  static async changeUrls(domain) {   
+    const robotsRegex = /<meta[^>]*?name=["']robots["'][^>]*?>/i;
+    let unexts = domain;
     const externalStatus = []
     const robotExternals = [];
     const info = [];
@@ -176,9 +170,11 @@ class UrlService {
   }   
   const inform = mainInfo.flat(3)
   return inform
+
+
+
   }
 }
 
 
-
-module.exports = UrlService;
+module.exports = ChangeUrls;

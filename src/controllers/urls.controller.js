@@ -10,7 +10,18 @@ const OnlyStatusChecker = require('../service/mainLinks.redirect');
 
 class UrlsController {
 
-static async test(req, res, next) {
+  static async addChange(req, res, next) {
+    try {
+      const { campaign_id } = req.body
+      const urls = await UrlsModel.addChange(campaign_id);
+      console.log(campaign_id,"capasdasd");
+      res.send('success')
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async test(req, res, next) {
     try {
       const val = req.body;
       let data = [];
@@ -22,7 +33,6 @@ static async test(req, res, next) {
         info2 = await CheckerLinks.linkTest(url[i]);
         data.push(info2)
       }
-
       const worker = child_process.fork('src/Clusterization/cluster.js')
       worker.on('message', async function (msg) {
         let array = msg.flat(2);
